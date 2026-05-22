@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retirada de EPI - Totem de Segurança</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 800px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        @media (max-width: 768px) {
+            .container { grid-template-columns: 1fr; }
+        }
+
+        /* Lado Esquerdo: Interface do Totem */
+        .totem-screen {
+            padding: 30px;
+            border-right: 1px solid #eef0f3;
+        }
+
+        h2 {
+            color: #1a365d;
+            margin-bottom: 20px;
+            font-size: 22px;
+            border-bottom: 2px solid #3182ce;
+            padding-bottom: 8px;
+        }
+
+        .step-title {
+            font-size: 14px;
+            color: #718096;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .epi-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .epi-card {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .epi-card:hover {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+
+        .epi-card.selected {
+            border-color: #3182ce;
+            background: #bee3f8;
+            font-weight: bold;
+            transform: scale(1.02);
+        }
+
+        .epi-icon {
+            font-size: 28px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* Lado Direito: Simulador Físico */
+        .hardware-simulator {
+            background-color: #2d3748;
+            color: white;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge-reader {
+            background: #1a202c;
+            border: 4px solid #4a5568;
+            border-radius: 10px;
+            width: 100%;
+            padding: 25px;
+            text-align: center;
+            margin-top: 20px;
+            position: relative;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .reader-slot {
+            width: 80%;
+            height: 8px;
+            background: #000;
+            margin: 15px auto;
+            border-radius: 4px;
+        }
+
+        .reader-led {
+            width: 15px;
+            height: 15px;
+            background-color: #e53e3e;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            box-shadow: 0 0 8px #e53e3e;
+            transition: all 0.3s;
+        }
+
+        .reader-led.ready {
+            background-color: #dd6b20;
+            box-shadow: 0 0 8px #dd6b20;
+        }
+
+        .reader-led.success {
+            background-color: #38a169;
+            box-shadow: 0 0 12px #38a169;
+        }
+
+        .btn-badge {
+            background: #ecc94b;
+            color: #1a202c;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: background 0.2s;
+            display: none;
+        }
+
+        .btn-badge:hover {
+            background: #d69e2e;
+        }
+
+        /* Histórico / Logs */
+        .log-container {
+            width: 100%;
+            background: #1a202c;
+            border: 1px solid #4a5568;
+            border-radius: 6px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+            color: #a0aec0;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            border-left: 3px solid #3182ce;
+            padding-left: 5px;
+        }
+        .log-entry.success { border-left-color: #38a169; color: #c6f6d5; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="totem-screen">
+        <h2>Totem de EPI</h2>
+        
+        <div class="step-title">Passo 1: Selecione o EPI desejado</div>
+        <div class="epi-grid">
+            <div class="epi-card" onclick="selectEpi('Óculos de Proteção', '🥽')">
+                <span class="epi-icon">🥽</span>
+                <span>Óculos</span>
+            </div>
+            <div class="epi-card" onclick="selectEpi('Capacete de Segurança', '👷')">
+                <span class="epi-icon">👷</span>
+                <span>Capacete</span>
+            </div>
+            <div class="epi-card" onclick="selectEpi('Protetor Auricular', '🎧')">
+                <span class="epi-icon">🎧</span>
+                <span>Abafador</span>
+            </div>
+            <div class="epi-card" onclick="selectEpi('Luvas de Raspa', '🧤')">
+                <span class="epi-icon">🧤</span>
+                <span>Luvas</span>
+            </div>
+        </div>
+
+        <div id="instruction-step2" style="display: none;">
+            <div class="step-title" style="color: #dd6b20;">Passo 2: Aproxime seu Crachá</div>
+            <p style="font-size: 14px; color: #4a5568;">EPI Selecionado: <strong id="selected-epi-name">-</strong></p>
+        </div>
+    </div>
+
+    <div class="hardware-simulator">
+        <div style="text-align: center; width: 100%;">
+            <h3>Painel de Validação</h3>
+            <p style="font-size: 12px; color: #a0aec0;">Ações físicas do colaborador</p>
+            
+            <div class="badge-reader">
+                <div class="reader-led" id="led"></div>
+                <span id="reader-text" style="font-size: 14px; font-weight: bold;">AGUARDANDO EPI</span>
+                <div class="reader-slot"></div>
+            </div>
+
+            <button class="btn-badge" id="badge-btn" onclick="swipeBadge()">👋 PASSAR CRACHÁ (Simulação)</button>
+        </div>
+
+        <div style="width: 100%; margin-top: 20px;">
+            <p style="font-size: 12px; margin-bottom: 5px; color: #a0aec0;">Log do Sistema (Banco de Dados):</p>
+            <div class="log-container" id="log-screen">
+                <div class="log-entry">Sistema iniciado. Aguardando operação...</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let selectedEpi = null;
+    
+    // Lista de nomes aleatórios para simular diferentes funcionários
+    const colaboradores = [
+        "Carlos Silva (Matrícula: 4521)",
+        "Ana Souza (Matrícula: 1089)",
+        "Marcos Santos (Matrícula: 8852)",
+        "Juliana Lima (Matrícula: 3314)"
+    ];
+
+    function selectEpi(name, icon) {
+        selectedEpi = name;
+        
+        // Atualiza estilo visual dos cards
+        document.querySelectorAll('.epi-card').forEach(card => {
+            card.classList.remove('selected');
+            if(card.innerText.includes(name.split(' ')[0])) {
+                card.classList.add('selected');
+            }
+        });
+
+        // Atualiza instruções na tela
+        document.getElementById('instruction-step2').style.display = 'block';
+        document.getElementById('selected-epi-name').innerText = name;
+
+        // Atualiza o Leitor Magnético/RFID para pronto
+        const led = document.getElementById('led');
+        led.className = "reader-led ready";
+        document.getElementById('reader-text').innerText = "APROXIME O CRACHÁ";
+        document.getElementById('badge-btn').style.display = 'block';
+        
+        // CORRIGIDO: Adicionado as crases (Template Literals) para concatenar a variável name
+        addLog(`EPI selecionado: ${name}. Aguardando identificação.`);
+    }
+
+    function swipeBadge() {
+        if (!selectedEpi) return;
+
+        const led = document.getElementById('led');
+        const readerText = document.getElementById('reader-text');
+        const badgeBtn = document.getElementById('badge-btn');
+        
+        // Escolhe um funcionário aleatório para a simulação
+        const colaborador = colaboradores[Math.floor(Math.random() * colaboradores.length)];
+
+        // Simula a leitura
+        led.className = "reader-led success";
+        readerText.innerText = "ACESSO AUTORIZADO!";
+        badgeBtn.style.display = 'none';
+
+        // Registra no banco de dados fictício
+        const agora = new Date().toLocaleTimeString();
+        // CORRIGIDO: Adicionado as crases para ler as variáveis dentro do texto
+        addLog(`SUCESSO: ${colaborador} retirou 1x ${selectedEpi} às ${agora}`, true);
+
+        // Reseta o totem após 3.5 segundos para a próxima pessoa
+        setTimeout(() => {
+            selectedEpi = null;
+            document.querySelectorAll('.epi-card').forEach(card => card.classList.remove('selected'));
+            document.getElementById('instruction-step2').style.display = 'none';
+            led.className = "reader-led";
+            readerText.innerText = "AGUARDANDO EPI";
+            addLog("Totem liberado para o próximo colaborador.");
+        }, 3500);
+    }
+
+    function addLog(text, isSuccess = false) {
+        const logScreen = document.getElementById('log-screen');
+        const entry = document.createElement('div');
+        entry.className = isSuccess ? 'log-entry success' : 'log-entry';
+        entry.innerText = text;
+        logScreen.appendChild(entry);
+        logScreen.scrollTop = logScreen.scrollHeight; // Auto-scroll para o final
+    }
+</script>
+
+</body>
+</html>
